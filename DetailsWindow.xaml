@@ -25,7 +25,7 @@
         <Label Grid.Row="2" Grid.Column="0" Content="Arguments"/>
         <TextBox x:Name="displayNameTextBox" Grid.ColumnSpan="2" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" />
         <TextBox x:Name="pathTextBox" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" />
-        <TextBox x:Name="arguementsTextBox" Grid.ColumnSpan="2" Grid.Row="2" Grid.Column="1" Text="asdfasdf" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+        <TextBox x:Name="argumentsTextBox" Grid.ColumnSpan="2" Grid.Row="2" Grid.Column="1" Text="asdfasdf" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
         
         <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right">
             <Button Click="onButtonClickedCancel" Content="Cancel" Margin="10,10,10,10"/>

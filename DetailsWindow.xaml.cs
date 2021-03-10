@@ -5,8 +5,10 @@ using System.Windows;
 
 namespace AppStarter
 {
-    partial class DetailsWindow : Window
+    public partial class DetailsWindow : Window
     {
+        public ApplicationDetails applicationDetails {  get;   set; }
+
         public DetailsWindow(string path)
         {
             InitializeComponent();
@@ -15,16 +17,19 @@ namespace AppStarter
             displayNameTextBox.Text = filename;
             pathTextBox.Text = path;
 
+            applicationDetails = null;
+
         }
 
         private void onButtonClickedSave(object sender, RoutedEventArgs e)
         {
-
+            applicationDetails = new ApplicationDetails { name = displayNameTextBox.Text, path = pathTextBox.Text, arguments = argumentsTextBox.Text };
+            Close();
         }
         
         private void onButtonClickedCancel(object sender, RoutedEventArgs e)
         {
-
+            Close();
         }
     }
 }

@@ -56,7 +56,7 @@ namespace AppStarter
         {
             foreach (ApplicationDetails details in programs)
             {
-                System.Diagnostics.Process.Start(details.path);
+                System.Diagnostics.Process.Start(details.path, details.arguments);
             }
         }
 
@@ -82,16 +82,18 @@ namespace AppStarter
                         DetailsWindow details = new DetailsWindow(file);
                         details.ShowDialog();
 
-                        File.WriteAllText(FileName, string.Empty);
-                        openFileStream = File.OpenWrite(FileName);
+                        if (details.applicationDetails != null)
+                        {
+                            File.WriteAllText(FileName, string.Empty);
+                            openFileStream = File.OpenWrite(FileName);
 
-                        programs.Add(new ApplicationDetails { name = System.IO.Path.GetFileName(file), path = file });
+                            programs.Add(details.applicationDetails);
 
-                        BinaryFormatter serializer = new BinaryFormatter();
-                        serializer.Serialize(openFileStream, programs);
+                            BinaryFormatter serializer = new BinaryFormatter();
+                            serializer.Serialize(openFileStream, programs);
 
-                        openFileStream.Close();
-
+                            openFileStream.Close();
+                        }
                     }
                 }
             }

@@ -6,10 +6,11 @@ using System.Text;
 namespace AppStarter
 {
     [Serializable()]
-    class ApplicationDetails : INotifyPropertyChanged
+    public class ApplicationDetails : INotifyPropertyChanged
     {
         public string name { get; set; }
         public string path { get; set; }
+        public string arguments { get; set; }
 
 
         [field: NonSerialized]
