@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -23,7 +24,7 @@ namespace AppStarter
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ObservableCollection<ApplicationDetails> programs = new ObservableCollection<ApplicationDetails>();
+        private ObservableCollection<ApplicationDetails> Programs = new ObservableCollection<ApplicationDetails>();
         private string FileName = null;
 
         public MainWindow()
@@ -39,7 +40,7 @@ namespace AppStarter
                 if (openFileStream.Length != 0)
                 {
                     BinaryFormatter deserializer = new BinaryFormatter();
-                    programs = (ObservableCollection<ApplicationDetails>)deserializer.Deserialize(openFileStream);
+                    Programs = (ObservableCollection<ApplicationDetails>)deserializer.Deserialize(openFileStream);
                 }
 
             }
@@ -49,18 +50,44 @@ namespace AppStarter
             }
 
             openFileStream.Close();
-            AppList.ItemsSource = programs;
+            AppList.ItemsSource = Programs;
         }
 
-        private async void onButtonClickedStart(object sender, RoutedEventArgs e)
+        private void OnButtonClickedStart(object sender, RoutedEventArgs e)
         {
-            foreach (ApplicationDetails details in programs)
+            foreach (ApplicationDetails details in AppList.SelectedItems)
             {
-                System.Diagnostics.Process.Start(details.path, details.arguments);
+                System.Diagnostics.Process.Start(details.Path, details.Arguments);
             }
         }
 
-        private async void onButtonClickedAdd(object sender, RoutedEventArgs e)
+        private void OnButtonClickedDelete(object sender, RoutedEventArgs e)
+        {
+            MenuItem sen = (MenuItem)sender;
+            ApplicationDetails detail = (ApplicationDetails) sen.DataContext;
+            MessageBoxResult messageBoxResult = System.Windows.MessageBox.Show("Are you sure you want to delete the selected item?", "Delete Confirmation", System.Windows.MessageBoxButton.YesNo);
+            if (messageBoxResult == MessageBoxResult.Yes)
+            {
+                Programs.Remove(detail);
+                WriteToDisk();
+            }
+        }
+
+        private void OnButtonClickedEdit(object sender, RoutedEventArgs e)
+        {
+            MenuItem sen = (MenuItem)sender;
+            ApplicationDetails detail = (ApplicationDetails)sen.DataContext;
+
+            DetailsWindow detailsDialog = new DetailsWindow(detail);
+            bool? success = detailsDialog.ShowDialog();
+
+            if (success == true && detailsDialog.ApplicationDetails != null)
+            {
+                WriteToDisk();
+            }
+        }
+
+        private void OnButtonClickedAdd(object sender, RoutedEventArgs e)
         {
             var picker = new Microsoft.Win32.OpenFileDialog();
             picker.Filter = "Executables(.exe) | *.exe";
@@ -75,30 +102,33 @@ namespace AppStarter
                 string file = picker.FileName;
                 if (file != null)
                 {
-                    Stream openFileStream = null;
-
                     if (File.Exists(FileName))
                     {
-                        DetailsWindow details = new DetailsWindow(file);
-                        details.ShowDialog();
+                        DetailsWindow detailsDialog = new DetailsWindow(file);
+                        detailsDialog.ShowDialog();
 
-                        if (details.applicationDetails != null)
+                        if (detailsDialog.ApplicationDetails != null)
                         {
-                            File.WriteAllText(FileName, string.Empty);
-                            openFileStream = File.OpenWrite(FileName);
-
-                            programs.Add(details.applicationDetails);
-
-                            BinaryFormatter serializer = new BinaryFormatter();
-                            serializer.Serialize(openFileStream, programs);
-
-                            openFileStream.Close();
+                            Programs.Add(detailsDialog.ApplicationDetails);
+                            WriteToDisk();
                         }
                     }
                 }
             }
+        }
 
-            
+        private void WriteToDisk()
+        {
+
+            Stream openFileStream = null;
+
+            File.WriteAllText(FileName, string.Empty);
+            openFileStream = File.OpenWrite(FileName);
+
+            BinaryFormatter serializer = new BinaryFormatter();
+            serializer.Serialize(openFileStream, Programs);
+
+            openFileStream.Close();
         }
     }
 }

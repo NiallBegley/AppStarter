@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 
 namespace AppStarter
 {
     public partial class DetailsWindow : Window
     {
-        public ApplicationDetails applicationDetails {  get;   set; }
+        public ApplicationDetails ApplicationDetails {  get;   set; }
 
         public DetailsWindow(string path)
         {
@@ -17,17 +18,54 @@ namespace AppStarter
             displayNameTextBox.Text = filename;
             pathTextBox.Text = path;
 
-            applicationDetails = null;
+            ApplicationDetails = null;
 
+        }
+
+        public DetailsWindow(ApplicationDetails details)
+        {
+            InitializeComponent();
+
+            displayNameTextBox.Text = details.Name;
+            pathTextBox.Text = details.Path;
+            argumentsTextBox.Text = details.Arguments;
+
+            ApplicationDetails = details;
         }
 
         private void onButtonClickedSave(object sender, RoutedEventArgs e)
         {
-            applicationDetails = new ApplicationDetails { name = displayNameTextBox.Text, path = pathTextBox.Text, arguments = argumentsTextBox.Text };
+            Save();
+
             Close();
         }
         
-        private void onButtonClickedCancel(object sender, RoutedEventArgs e)
+        private void Save()
+        {
+            if (ApplicationDetails == null)
+            {
+                ApplicationDetails = new ApplicationDetails { Name = displayNameTextBox.Text, Path = pathTextBox.Text, Arguments = argumentsTextBox.Text };
+            }
+            else
+            {
+                ApplicationDetails.Name = displayNameTextBox.Text;
+                ApplicationDetails.Path = pathTextBox.Text;
+                ApplicationDetails.Arguments = argumentsTextBox.Text;
+            }
+
+            DialogResult = true;
+              
+        }
+        
+        private void OnKeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                Save();
+                Close();
+            }
+        }
+        private void OnButtonClickedCancel(object sender, RoutedEventArgs e)
         {
             Close();
         }
