@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace AppStarter
 {
@@ -12,6 +16,11 @@ namespace AppStarter
         private string _path;
         private string _arguments;
         private bool _isSelected;
+        private string _iconPath;
+
+        [field: NonSerialized]
+        private BitmapImage _icon;
+
         public string Name 
         { 
             get { return _name; } 
@@ -55,12 +64,39 @@ namespace AppStarter
             }
         }
 
+        public BitmapImage Icon
+        {
+            get { return _icon; }
+            set
+            {
+                if (_icon == value)
+                    return;
+                _icon = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("Icon"));
+            }
+        }
+
+        public string IconPath
+        {
+            get { return _iconPath; }
+            set
+            {
+                if (_iconPath == value)
+                    return;
+                _iconPath = value;
+
+                LoadIcon();
+                OnPropertyChanged(new PropertyChangedEventArgs("IconPath"));
+            }
+        }
+
         private void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, e);
 
         }
+
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -70,6 +106,29 @@ namespace AppStarter
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        [OnDeserialized()]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            LoadIcon();
+        }
+
+        private void LoadIcon()
+        {
+            _icon = new BitmapImage();
+            using (FileStream stream = File.OpenRead(_iconPath))
+            {
+                _icon.BeginInit();
+                _icon.CacheOption = BitmapCacheOption.OnLoad;
+                _icon.StreamSource = stream;
+                _icon.EndInit();
+            }
+        }
+
+        public void DeleteIcon()
+        {
+            File.Delete(_iconPath);
         }
     }
 }

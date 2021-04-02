@@ -12,10 +12,12 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace AppStarter
 {
@@ -25,18 +27,24 @@ namespace AppStarter
     public partial class MainWindow : Window
     {
         private ObservableCollection<ApplicationDetails> Programs = new ObservableCollection<ApplicationDetails>();
-        private string FileName = null;
-
+        private string PreferencesFile = null;
+        private string LocalApplicationDataDirectory = null;
         public MainWindow()
         {
             InitializeComponent();
 
-            FileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Applications.bin";
+            LocalApplicationDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AppStarter");
+            PreferencesFile = Path.Combine(LocalApplicationDataDirectory,"Applications.bin");
             Stream openFileStream = null;
 
-            if (File.Exists(FileName))
+            if(!Directory.Exists(LocalApplicationDataDirectory))
             {
-                openFileStream = File.OpenRead(FileName);
+                Directory.CreateDirectory(LocalApplicationDataDirectory);
+            }
+
+            if (File.Exists(PreferencesFile))
+            {
+                openFileStream = File.OpenRead(PreferencesFile);
                 if (openFileStream.Length != 0)
                 {
                     BinaryFormatter deserializer = new BinaryFormatter();
@@ -46,7 +54,7 @@ namespace AppStarter
             }
             else
             {
-                openFileStream = File.Create(FileName);
+                openFileStream = File.Create(PreferencesFile);
             }
 
             openFileStream.Close();
@@ -55,9 +63,12 @@ namespace AppStarter
 
         private void OnButtonClickedStart(object sender, RoutedEventArgs e)
         {
-            foreach (ApplicationDetails details in AppList.SelectedItems)
+            foreach (ApplicationDetails details in Programs)
             {
-                System.Diagnostics.Process.Start(details.Path, details.Arguments);
+                if(details.IsSelected)
+                {
+                    System.Diagnostics.Process.Start(details.Path, details.Arguments);
+                }
             }
         }
 
@@ -69,6 +80,8 @@ namespace AppStarter
             if (messageBoxResult == MessageBoxResult.Yes)
             {
                 Programs.Remove(detail);
+                detail.DeleteIcon();
+
                 WriteToDisk();
             }
         }
@@ -102,16 +115,33 @@ namespace AppStarter
                 string file = picker.FileName;
                 if (file != null)
                 {
-                    if (File.Exists(FileName))
-                    {
-                        DetailsWindow detailsDialog = new DetailsWindow(file);
-                        detailsDialog.ShowDialog();
+                    DetailsWindow detailsDialog = new DetailsWindow(file);
+                    detailsDialog.ShowDialog();
 
-                        if (detailsDialog.ApplicationDetails != null)
+                    if (detailsDialog.ApplicationDetails != null)
+                    {
+                        //Extract the icon from the executable
+                        using (System.Drawing.Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(file))
                         {
-                            Programs.Add(detailsDialog.ApplicationDetails);
-                            WriteToDisk();
+                            //Create an image from the icon 
+                            BitmapSource iconImage = Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                            string iconPath = Path.Combine(LocalApplicationDataDirectory, detailsDialog.ApplicationDetails.Name + ".png");
+
+                            //Save the icon to disk
+                            using (var fileStream = new FileStream(iconPath, FileMode.Create))
+                            {
+                                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                                encoder.Frames.Add(BitmapFrame.Create(iconImage));
+                                encoder.Save(fileStream);
+                                fileStream.Close();
+
+                                //Set the icon path, which will cause the icon to load from disk automatically
+                                detailsDialog.ApplicationDetails.IconPath = iconPath;
+                            }
                         }
+
+                        Programs.Add(detailsDialog.ApplicationDetails);
+                        WriteToDisk();
                     }
                 }
             }
@@ -122,8 +152,8 @@ namespace AppStarter
 
             Stream openFileStream = null;
 
-            File.WriteAllText(FileName, string.Empty);
-            openFileStream = File.OpenWrite(FileName);
+            File.WriteAllText(PreferencesFile, string.Empty);
+            openFileStream = File.OpenWrite(PreferencesFile);
 
             BinaryFormatter serializer = new BinaryFormatter();
             serializer.Serialize(openFileStream, Programs);
