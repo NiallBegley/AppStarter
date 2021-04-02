@@ -36,7 +36,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <CheckBox Grid.Column="0" IsChecked="{Binding Path=DataContext.IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListViewItem}}}" VerticalAlignment="Center"></CheckBox>
-                        <TextBlock Text="{Binding Name}" Grid.Column="2" HorizontalAlignment="Stretch" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Name}" Grid.Column="2" HorizontalAlignment="Stretch" Margin="5,0,10,0" VerticalAlignment="Center"/>
                         <Image Source="{Binding Icon}" Grid.Column="1" Margin="10,0,0,0" Width="20" Height="20"></Image>
                     </Grid>
                 </DataTemplate>
