@@ -5,16 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AppStarter"
         mc:Ignorable="d"
-        Title="AppStarter" Height="450" Width="300">
+        Title="AppStarter" Height="450" Width="300"
+        Closing="WindowClosing"  
+        MinHeight="330"
+        MinWidth="250"
+        >
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <ListView x:Name="AppList">
+        <ListView x:Name="AppList" Margin="10,10,10,0" Grid.ColumnSpan="2">
             <ListView.Resources>
                 <ContextMenu x:Key="ItemContextMenu">
                     <MenuItem Header="Delete" Click="OnButtonClickedDelete"/>
@@ -42,10 +47,10 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" FlowDirection="RightToLeft" Margin="0,0,10,0">
-            <Button Content="Add" Click="OnButtonClickedAdd" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="1,3,1,3" Width="100"/>
-            <Button Content="Start Selected" Click="OnButtonClickedStart" Margin="10,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Padding="1,3,1,3"/>
-        </StackPanel>
+        <!--<StackPanel Orientation="Horizontal" Grid.Row="1" FlowDirection="RightToLeft" Margin="0,0,10,0">-->
+        <Button Content="Start Selected" Grid.Row="2" Grid.Column="1"  Click="OnButtonClickedStart"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Padding="1,3,1,3"/>
+        <Button Content="Add..." Grid.Row="1"  Grid.Column="0" Click="OnButtonClickedAdd" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="1,3,1,3" Width="100" />
+        <!--</StackPanel>-->
 
     </Grid>
     

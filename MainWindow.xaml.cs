@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -29,6 +30,7 @@ namespace AppStarter
         private ObservableCollection<ApplicationDetails> Programs = new ObservableCollection<ApplicationDetails>();
         private string PreferencesFile = null;
         private string LocalApplicationDataDirectory = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -70,6 +72,10 @@ namespace AppStarter
                     System.Diagnostics.Process.Start(details.Path, details.Arguments);
                 }
             }
+
+            //Shut down the application once everything gets launched - hard to imagine a scenario where a user would want it to stick around.
+            //Shutdown will cause the exit event to trigger, which will save the current application details to disk including which apps are checked
+            System.Windows.Application.Current.Shutdown();
         }
 
         private void OnButtonClickedDelete(object sender, RoutedEventArgs e)
@@ -149,7 +155,6 @@ namespace AppStarter
 
         private void WriteToDisk()
         {
-
             Stream openFileStream = null;
 
             File.WriteAllText(PreferencesFile, string.Empty);
@@ -159,6 +164,11 @@ namespace AppStarter
             serializer.Serialize(openFileStream, Programs);
 
             openFileStream.Close();
+        }
+
+        void WindowClosing(object sender, CancelEventArgs e)
+        {
+            WriteToDisk();
         }
     }
 }
